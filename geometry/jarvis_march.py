@@ -32,9 +32,9 @@ class Point:
     2.0
     """
 
-    def __init__(self, x: float, y: float) -> None:
-        self.x = x
-        self.y = y
+    def __init__(self, x_coordinate: float, y_coordinate: float) -> None:
+        self.x = x_coordinate
+        self.y = y_coordinate
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Point):
@@ -48,7 +48,7 @@ class Point:
         return hash((self.x, self.y))
 
 
-def _cross_product(o: Point, a: Point, b: Point) -> float:
+def _cross_product(origin: Point, point_a: Point, point_b: Point) -> float:
     """
     Calculate the cross product of vectors OA and OB.
 
@@ -57,17 +57,19 @@ def _cross_product(o: Point, a: Point, b: Point) -> float:
         = 0: Collinear
         < 0: Clockwise turn (right turn)
 
-    >>> o = Point(0, 0)
-    >>> a = Point(1, 1)
-    >>> b = Point(2, 0)
-    >>> _cross_product(o, a, b) < 0
+    >>> origin = Point(0, 0)
+    >>> point_a = Point(1, 1)
+    >>> point_b = Point(2, 0)
+    >>> _cross_product(origin, point_a, point_b) < 0
     True
-    >>> _cross_product(o, Point(1, 0), Point(2, 0)) == 0
+    >>> _cross_product(origin, Point(1, 0), Point(2, 0)) == 0
     True
-    >>> _cross_product(o, Point(1, 0), Point(1, 1)) > 0
+    >>> _cross_product(origin, Point(1, 0), Point(1, 1)) > 0
     True
     """
-    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
+    return (point_a.x - origin.x) * (point_b.y - origin.y) - (point_a.y - origin.y) * (
+        point_b.x - origin.x
+    )
 
 
 def _is_point_on_segment(p1: Point, p2: Point, point: Point) -> bool:
