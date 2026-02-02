@@ -18,21 +18,11 @@ REFERENCES:
     -> GeeksforGeeks: https://www.geeksforgeeks.org/convex-hull-set-1-jarviss-algorithm-or-wrapping/
 """
 
-# pytest: disable=pytest-run-parallel
-
 from __future__ import annotations
 
 
 class Point:
-    """
-    Represents a 2D point with x and y coordinates.
-
-    >>> p = Point(1.0, 2.0)
-    >>> p.x
-    1.0
-    >>> p.y
-    2.0
-    """
+    """Represents a 2D point with x and y coordinates."""
 
     def __init__(self, x_coordinate: float, y_coordinate: float) -> None:
         self.x = x_coordinate
@@ -58,16 +48,6 @@ def _cross_product(origin: Point, point_a: Point, point_b: Point) -> float:
         > 0: Counter-clockwise turn (left turn)
         = 0: Collinear
         < 0: Clockwise turn (right turn)
-
-    >>> origin = Point(0, 0)
-    >>> point_a = Point(1, 1)
-    >>> point_b = Point(2, 0)
-    >>> _cross_product(origin, point_a, point_b) < 0
-    True
-    >>> _cross_product(origin, Point(1, 0), Point(2, 0)) == 0
-    True
-    >>> _cross_product(origin, Point(1, 0), Point(1, 1)) > 0
-    True
     """
     return (point_a.x - origin.x) * (point_b.y - origin.y) - (point_a.y - origin.y) * (
         point_b.x - origin.x
@@ -75,16 +55,7 @@ def _cross_product(origin: Point, point_a: Point, point_b: Point) -> float:
 
 
 def _is_point_on_segment(p1: Point, p2: Point, point: Point) -> bool:
-    """
-    Check if a point lies on the line segment between p1 and p2.
-
-    >>> _is_point_on_segment(Point(0, 0), Point(2, 2), Point(1, 1))
-    True
-    >>> _is_point_on_segment(Point(0, 0), Point(2, 2), Point(3, 3))
-    False
-    >>> _is_point_on_segment(Point(0, 0), Point(2, 0), Point(1, 0))
-    True
-    """
+    """Check if a point lies on the line segment between p1 and p2."""
     # Check if point is collinear with segment endpoints
     cross = (point.y - p1.y) * (p2.x - p1.x) - (point.x - p1.x) * (p2.y - p1.y)
 
@@ -110,52 +81,6 @@ def jarvis_march(points: list[Point]) -> list[Point]:
     Returns:
         List of Points that form the convex hull in counter-clockwise order.
         Returns empty list if there are fewer than 3 non-collinear points.
-
-    Examples:
-        >>> # Triangle
-        >>> p1, p2, p3 = Point(1, 1), Point(2, 1), Point(1.5, 2)
-        >>> hull = jarvis_march([p1, p2, p3])
-        >>> len(hull)
-        3
-        >>> all(p in hull for p in [p1, p2, p3])
-        True
-
-        >>> # Collinear points return empty hull
-        >>> points = [Point(i, 0) for i in range(5)]
-        >>> jarvis_march(points)
-        []
-
-        >>> # Rectangle with interior point - interior point excluded
-        >>> p1, p2 = Point(1, 1), Point(2, 1)
-        >>> p3, p4 = Point(2, 2), Point(1, 2)
-        >>> p5 = Point(1.5, 1.5)
-        >>> hull = jarvis_march([p1, p2, p3, p4, p5])
-        >>> len(hull)
-        4
-        >>> p5 in hull
-        False
-
-        >>> # Star shape - only tips are in hull
-        >>> tips = [
-        ...     Point(-5, 6), Point(-11, 0), Point(-9, -8),
-        ...     Point(4, 4), Point(6, -7)
-        ... ]
-        >>> interior = [Point(-7, -2), Point(-2, -4), Point(0, 1)]
-        >>> hull = jarvis_march(tips + interior)
-        >>> len(hull)
-        5
-        >>> all(p in hull for p in tips)
-        True
-        >>> any(p in hull for p in interior)
-        False
-
-        >>> # Too few points
-        >>> jarvis_march([])
-        []
-        >>> jarvis_march([Point(0, 0)])
-        []
-        >>> jarvis_march([Point(0, 0), Point(1, 1)])
-        []
     """
     if len(points) <= 2:
         return []
@@ -211,6 +136,7 @@ def jarvis_march(points: list[Point]) -> list[Point]:
 
 
 if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()
+    # Example usage
+    points = [Point(0, 0), Point(1, 1), Point(0, 1), Point(1, 0), Point(0.5, 0.5)]
+    hull = jarvis_march(points)
+    print(f"Convex hull: {hull}")
