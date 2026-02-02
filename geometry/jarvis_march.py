@@ -18,6 +18,8 @@ REFERENCES:
     -> GeeksforGeeks: https://www.geeksforgeeks.org/convex-hull-set-1-jarviss-algorithm-or-wrapping/
 """
 
+# pytest: disable=pytest-run-parallel
+
 from __future__ import annotations
 
 
