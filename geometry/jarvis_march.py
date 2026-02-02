@@ -188,7 +188,7 @@ def jarvis_march(points: list[Point]) -> list[Point]:
         # Check if the last point is collinear with new point and second-to-last
         last = len(convex_hull) - 1
         if len(convex_hull) > 1 and _is_point_on_segment(
-            convex_hull[last], convex_hull[last - 1], points[current_idx]
+            convex_hull[last - 1], convex_hull[last], points[current_idx]
         ):
             # Remove the last point from the hull
             convex_hull[last] = Point(points[current_idx].x, points[current_idx].y)
@@ -200,7 +200,7 @@ def jarvis_march(points: list[Point]) -> list[Point]:
         return []
 
     last = len(convex_hull) - 1
-    if _is_point_on_segment(convex_hull[last], convex_hull[last - 1], convex_hull[0]):
+    if _is_point_on_segment(convex_hull[last - 1], convex_hull[last], convex_hull[0]):
         convex_hull.pop()
         if len(convex_hull) == 2:
             return []
