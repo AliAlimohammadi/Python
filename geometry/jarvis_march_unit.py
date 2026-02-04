@@ -2,7 +2,6 @@
 Unit tests for Jarvis March (Gift Wrapping) algorithm.
 """
 
-import pytest
 from geometry.jarvis_march import Point, jarvis_march
 
 
