@@ -15,7 +15,8 @@ USAGE:
 
 REFERENCES:
     -> Wikipedia reference: https://en.wikipedia.org/wiki/Gift_wrapping_algorithm
-    -> GeeksforGeeks: https://www.geeksforgeeks.org/convex-hull-set-1-jarviss-algorithm-or-wrapping/
+    -> GeeksforGeeks:
+       https://www.geeksforgeeks.org/convex-hull-set-1-jarviss-algorithm-or-wrapping/
 """
 
 from __future__ import annotations
@@ -49,9 +50,9 @@ def _cross_product(origin: Point, point_a: Point, point_b: Point) -> float:
         = 0: Collinear
         < 0: Clockwise turn (right turn)
     """
-    return (point_a.x - origin.x) * (point_b.y - origin.y) - (point_a.y - origin.y) * (
-        point_b.x - origin.x
-    )
+    return (point_a.x - origin.x) * (point_b.y - origin.y) - (
+        point_a.y - origin.y
+    ) * (point_b.x - origin.x)
 
 
 def _is_point_on_segment(p1: Point, p2: Point, point: Point) -> bool:
@@ -68,12 +69,62 @@ def _is_point_on_segment(p1: Point, p2: Point, point: Point) -> bool:
     ) <= point.y <= max(p1.y, p2.y)
 
 
+def _find_leftmost_point(points: list[Point]) -> int:
+    """Find index of leftmost point (and bottom-most in case of tie)."""
+    left_idx = 0
+    for i in range(1, len(points)):
+        if points[i].x < points[left_idx].x or (
+            points[i].x == points[left_idx].x and points[i].y < points[left_idx].y
+        ):
+            left_idx = i
+    return left_idx
+
+
+def _find_next_hull_point(points: list[Point], current_idx: int) -> int:
+    """Find the next point on the convex hull."""
+    next_idx = (current_idx + 1) % len(points)
+    # Ensure next_idx is not the same as current_idx
+    while next_idx == current_idx:
+        next_idx = (next_idx + 1) % len(points)
+
+    for i in range(len(points)):
+        if i == current_idx:
+            continue
+        cross = _cross_product(points[current_idx], points[i], points[next_idx])
+        if cross > 0:
+            next_idx = i
+
+    return next_idx
+
+
+def _is_valid_polygon(hull: list[Point]) -> bool:
+    """Check if hull forms a valid polygon (has at least one non-collinear turn)."""
+    for i in range(len(hull)):
+        p1 = hull[i]
+        p2 = hull[(i + 1) % len(hull)]
+        p3 = hull[(i + 2) % len(hull)]
+        if abs(_cross_product(p1, p2, p3)) > 1e-9:
+            return True
+    return False
+
+
+def _add_point_to_hull(hull: list[Point], point: Point) -> None:
+    """Add a point to hull, removing collinear intermediate points."""
+    last = len(hull) - 1
+    if len(hull) > 1 and _is_point_on_segment(
+        hull[last - 1], hull[last], point
+    ):
+        hull[last] = Point(point.x, point.y)
+    else:
+        hull.append(Point(point.x, point.y))
+
+
 def jarvis_march(points: list[Point]) -> list[Point]:
     """
     Find the convex hull of a set of points using the Jarvis March algorithm.
 
-    The algorithm starts with the leftmost point and wraps around the set of points,
-    selecting the most counter-clockwise point at each step.
+    The algorithm starts with the leftmost point and wraps around the set of
+    points, selecting the most counter-clockwise point at each step.
 
     Args:
         points: List of Point objects representing 2D coordinates
@@ -93,15 +144,8 @@ def jarvis_march(points: list[Point]) -> list[Point]:
 
     convex_hull: list[Point] = []
 
-    # Find the leftmost point (and bottom-most in case of tie)
-    left_point_idx = 0
-    for i in range(1, len(unique_points)):
-        if unique_points[i].x < unique_points[left_point_idx].x or (
-            unique_points[i].x == unique_points[left_point_idx].x
-            and unique_points[i].y < unique_points[left_point_idx].y
-        ):
-            left_point_idx = i
-
+    # Find the leftmost point
+    left_point_idx = _find_leftmost_point(unique_points)
     convex_hull.append(
         Point(unique_points[left_point_idx].x, unique_points[left_point_idx].y)
     )
@@ -109,71 +153,32 @@ def jarvis_march(points: list[Point]) -> list[Point]:
     current_idx = left_point_idx
     while True:
         # Find the next counter-clockwise point
-        next_idx = (current_idx + 1) % len(unique_points)
-        # Make sure next_idx is not the same as current_idx (handle duplicates)
-        while next_idx == current_idx:
-            next_idx = (next_idx + 1) % len(unique_points)
-
-        for i in range(len(unique_points)):
-            # Skip the current point itself (handles duplicates)
-            if i == current_idx:
-                continue
-            if (
-                _cross_product(
-                    unique_points[current_idx],
-                    unique_points[i],
-                    unique_points[next_idx],
-                )
-                > 0
-            ):
-                next_idx = i
+        next_idx = _find_next_hull_point(unique_points, current_idx)
 
         if next_idx == left_point_idx:
-            # Completed constructing the hull
             break
 
-        # Safety check: if next_idx == current_idx, we have duplicates causing issues
         if next_idx == current_idx:
             break
 
         current_idx = next_idx
+        _add_point_to_hull(convex_hull, unique_points[current_idx])
 
-        # Check if the last point is collinear with new point and second-to-last
-        last = len(convex_hull) - 1
-        if len(convex_hull) > 1 and _is_point_on_segment(
-            convex_hull[last - 1], convex_hull[last], unique_points[current_idx]
-        ):
-            # Remove the last point from the hull
-            convex_hull[last] = Point(
-                unique_points[current_idx].x, unique_points[current_idx].y
-            )
-        else:
-            convex_hull.append(
-                Point(unique_points[current_idx].x, unique_points[current_idx].y)
-            )
-
-    # Check for edge case: last point collinear with first and second-to-last
+    # Check for degenerate cases
     if len(convex_hull) <= 2:
         return []
 
+    # Check if last point is collinear with first and second-to-last
     last = len(convex_hull) - 1
-    if _is_point_on_segment(convex_hull[last - 1], convex_hull[last], convex_hull[0]):
+    if _is_point_on_segment(
+        convex_hull[last - 1], convex_hull[last], convex_hull[0]
+    ):
         convex_hull.pop()
         if len(convex_hull) == 2:
             return []
 
-    # Final check: verify the hull forms a valid polygon (at least one non-zero cross product)
-    # If all cross products are zero, all points are collinear
-    has_turn = False
-    for i in range(len(convex_hull)):
-        p1 = convex_hull[i]
-        p2 = convex_hull[(i + 1) % len(convex_hull)]
-        p3 = convex_hull[(i + 2) % len(convex_hull)]
-        if abs(_cross_product(p1, p2, p3)) > 1e-9:
-            has_turn = True
-            break
-
-    if not has_turn:
+    # Verify the hull forms a valid polygon
+    if not _is_valid_polygon(convex_hull):
         return []
 
     return convex_hull
