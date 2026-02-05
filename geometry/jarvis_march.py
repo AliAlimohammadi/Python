@@ -87,7 +87,7 @@ def jarvis_march(points: list[Point]) -> list[Point]:
 
     # Remove duplicate points to avoid infinite loops
     unique_points = list(set(points))
-    
+
     if len(unique_points) <= 2:
         return []
 
@@ -102,7 +102,9 @@ def jarvis_march(points: list[Point]) -> list[Point]:
         ):
             left_point_idx = i
 
-    convex_hull.append(Point(unique_points[left_point_idx].x, unique_points[left_point_idx].y))
+    convex_hull.append(
+        Point(unique_points[left_point_idx].x, unique_points[left_point_idx].y)
+    )
 
     current_idx = left_point_idx
     while True:
@@ -111,12 +113,19 @@ def jarvis_march(points: list[Point]) -> list[Point]:
         # Make sure next_idx is not the same as current_idx (handle duplicates)
         while next_idx == current_idx:
             next_idx = (next_idx + 1) % len(unique_points)
-        
+
         for i in range(len(unique_points)):
             # Skip the current point itself (handles duplicates)
             if i == current_idx:
                 continue
-            if _cross_product(unique_points[current_idx], unique_points[i], unique_points[next_idx]) > 0:
+            if (
+                _cross_product(
+                    unique_points[current_idx],
+                    unique_points[i],
+                    unique_points[next_idx],
+                )
+                > 0
+            ):
                 next_idx = i
 
         if next_idx == left_point_idx:
@@ -135,9 +144,13 @@ def jarvis_march(points: list[Point]) -> list[Point]:
             convex_hull[last - 1], convex_hull[last], unique_points[current_idx]
         ):
             # Remove the last point from the hull
-            convex_hull[last] = Point(unique_points[current_idx].x, unique_points[current_idx].y)
+            convex_hull[last] = Point(
+                unique_points[current_idx].x, unique_points[current_idx].y
+            )
         else:
-            convex_hull.append(Point(unique_points[current_idx].x, unique_points[current_idx].y))
+            convex_hull.append(
+                Point(unique_points[current_idx].x, unique_points[current_idx].y)
+            )
 
     # Check for edge case: last point collinear with first and second-to-last
     if len(convex_hull) <= 2:
@@ -159,7 +172,7 @@ def jarvis_march(points: list[Point]) -> list[Point]:
         if abs(_cross_product(p1, p2, p3)) > 1e-9:
             has_turn = True
             break
-    
+
     if not has_turn:
         return []
 
