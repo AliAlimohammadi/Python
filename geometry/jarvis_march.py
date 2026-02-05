@@ -50,9 +50,9 @@ def _cross_product(origin: Point, point_a: Point, point_b: Point) -> float:
         = 0: Collinear
         < 0: Clockwise turn (right turn)
     """
-    return (point_a.x - origin.x) * (point_b.y - origin.y) - (
-        point_a.y - origin.y
-    ) * (point_b.x - origin.x)
+    return (point_a.x - origin.x) * (point_b.y - origin.y) - (point_a.y - origin.y) * (
+        point_b.x - origin.x
+    )
 
 
 def _is_point_on_segment(p1: Point, p2: Point, point: Point) -> bool:
@@ -111,9 +111,7 @@ def _is_valid_polygon(hull: list[Point]) -> bool:
 def _add_point_to_hull(hull: list[Point], point: Point) -> None:
     """Add a point to hull, removing collinear intermediate points."""
     last = len(hull) - 1
-    if len(hull) > 1 and _is_point_on_segment(
-        hull[last - 1], hull[last], point
-    ):
+    if len(hull) > 1 and _is_point_on_segment(hull[last - 1], hull[last], point):
         hull[last] = Point(point.x, point.y)
     else:
         hull.append(Point(point.x, point.y))
@@ -170,9 +168,7 @@ def jarvis_march(points: list[Point]) -> list[Point]:
 
     # Check if last point is collinear with first and second-to-last
     last = len(convex_hull) - 1
-    if _is_point_on_segment(
-        convex_hull[last - 1], convex_hull[last], convex_hull[0]
-    ):
+    if _is_point_on_segment(convex_hull[last - 1], convex_hull[last], convex_hull[0]):
         convex_hull.pop()
         if len(convex_hull) == 2:
             return []
