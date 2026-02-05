@@ -85,29 +85,46 @@ def jarvis_march(points: list[Point]) -> list[Point]:
     if len(points) <= 2:
         return []
 
+    # Remove duplicate points to avoid infinite loops
+    unique_points = list(set(points))
+    
+    if len(unique_points) <= 2:
+        return []
+
     convex_hull: list[Point] = []
 
     # Find the leftmost point (and bottom-most in case of tie)
     left_point_idx = 0
-    for i in range(1, len(points)):
-        if points[i].x < points[left_point_idx].x or (
-            points[i].x == points[left_point_idx].x
-            and points[i].y < points[left_point_idx].y
+    for i in range(1, len(unique_points)):
+        if unique_points[i].x < unique_points[left_point_idx].x or (
+            unique_points[i].x == unique_points[left_point_idx].x
+            and unique_points[i].y < unique_points[left_point_idx].y
         ):
             left_point_idx = i
 
-    convex_hull.append(Point(points[left_point_idx].x, points[left_point_idx].y))
+    convex_hull.append(Point(unique_points[left_point_idx].x, unique_points[left_point_idx].y))
 
     current_idx = left_point_idx
     while True:
         # Find the next counter-clockwise point
-        next_idx = (current_idx + 1) % len(points)
-        for i in range(len(points)):
-            if _cross_product(points[current_idx], points[i], points[next_idx]) > 0:
+        next_idx = (current_idx + 1) % len(unique_points)
+        # Make sure next_idx is not the same as current_idx (handle duplicates)
+        while next_idx == current_idx:
+            next_idx = (next_idx + 1) % len(unique_points)
+        
+        for i in range(len(unique_points)):
+            # Skip the current point itself (handles duplicates)
+            if i == current_idx:
+                continue
+            if _cross_product(unique_points[current_idx], unique_points[i], unique_points[next_idx]) > 0:
                 next_idx = i
 
         if next_idx == left_point_idx:
             # Completed constructing the hull
+            break
+
+        # Safety check: if next_idx == current_idx, we have duplicates causing issues
+        if next_idx == current_idx:
             break
 
         current_idx = next_idx
@@ -115,12 +132,12 @@ def jarvis_march(points: list[Point]) -> list[Point]:
         # Check if the last point is collinear with new point and second-to-last
         last = len(convex_hull) - 1
         if len(convex_hull) > 1 and _is_point_on_segment(
-            convex_hull[last - 1], convex_hull[last], points[current_idx]
+            convex_hull[last - 1], convex_hull[last], unique_points[current_idx]
         ):
             # Remove the last point from the hull
-            convex_hull[last] = Point(points[current_idx].x, points[current_idx].y)
+            convex_hull[last] = Point(unique_points[current_idx].x, unique_points[current_idx].y)
         else:
-            convex_hull.append(Point(points[current_idx].x, points[current_idx].y))
+            convex_hull.append(Point(unique_points[current_idx].x, unique_points[current_idx].y))
 
     # Check for edge case: last point collinear with first and second-to-last
     if len(convex_hull) <= 2:
@@ -131,6 +148,20 @@ def jarvis_march(points: list[Point]) -> list[Point]:
         convex_hull.pop()
         if len(convex_hull) == 2:
             return []
+
+    # Final check: verify the hull forms a valid polygon (at least one non-zero cross product)
+    # If all cross products are zero, all points are collinear
+    has_turn = False
+    for i in range(len(convex_hull)):
+        p1 = convex_hull[i]
+        p2 = convex_hull[(i + 1) % len(convex_hull)]
+        p3 = convex_hull[(i + 2) % len(convex_hull)]
+        if abs(_cross_product(p1, p2, p3)) > 1e-9:
+            has_turn = True
+            break
+    
+    if not has_turn:
+        return []
 
     return convex_hull
 
