@@ -2,7 +2,7 @@
 Tests for the Graham scan convex hull algorithm.
 """
 
-from graham_scan import Point, graham_scan
+from geometry.graham_scan import Point, graham_scan
 
 
 def test_empty_points() -> None:

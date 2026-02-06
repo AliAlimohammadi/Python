@@ -98,9 +98,9 @@ class Point:
         >>> Point(0, 0).consecutive_orientation(Point(1, 0), Point(2, 0))
         0.0
         """
-        return (point_a.x - self.x) * (point_b.y - point_a.y) - (point_a.y - self.y) * (
-            point_b.x - point_a.x
-        )
+        return (point_a.x - self.x) * (point_b.y - point_a.y) - (
+            point_a.y - self.y
+        ) * (point_b.x - point_a.x)
 
 
 def graham_scan(points: Sequence[Point]) -> list[Point]:
@@ -148,7 +148,7 @@ def graham_scan(points: Sequence[Point]) -> list[Point]:
         # Edge case where all points are the same
         return []
 
-    def polar_angle_key(point: Point) -> tuple[float, float]:
+    def polar_angle_key(point: Point) -> tuple[float, float, float]:
         """
         Key function for sorting points by polar angle relative to min_point.
 
@@ -166,7 +166,7 @@ def graham_scan(points: Sequence[Point]) -> list[Point]:
         return (dx, dy, -distance)  # Negative distance to sort farther points first
 
     # Sort by polar angle using a comparison based on cross product
-    def compare_points(point_a: Point, point_b: Point) -> float:
+    def compare_points(point_a: Point, point_b: Point) -> int:
         """Compare two points by polar angle relative to min_point."""
         orientation = min_point.consecutive_orientation(point_a, point_b)
         if orientation < 0.0:
@@ -177,7 +177,12 @@ def graham_scan(points: Sequence[Point]) -> list[Point]:
             # Collinear: farther point should come first
             dist_a = min_point.euclidean_distance(point_a)
             dist_b = min_point.euclidean_distance(point_b)
-            return -1 if dist_b < dist_a else (1 if dist_b > dist_a else 0)
+            if dist_b < dist_a:
+                return -1
+            elif dist_b > dist_a:
+                return 1
+            else:
+                return 0
 
     from functools import cmp_to_key
 
