@@ -38,9 +38,16 @@ class Point:
     x: float
     y: float
 
-    def __init__(self, x: float, y: float) -> None:
-        self.x = float(x)
-        self.y = float(y)
+    def __init__(self, x_coordinate: float, y_coordinate: float) -> None:
+        """
+        Initialize a 2D point.
+
+        Args:
+            x_coordinate: The x-coordinate (horizontal position) of the point
+            y_coordinate: The y-coordinate (vertical position) of the point
+        """
+        self.x = float(x_coordinate)
+        self.y = float(y_coordinate)
 
     def __eq__(self, other: object) -> bool:
         """
