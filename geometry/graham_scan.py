@@ -98,9 +98,9 @@ class Point:
         >>> Point(0, 0).consecutive_orientation(Point(1, 0), Point(2, 0))
         0.0
         """
-        return (point_a.x - self.x) * (point_b.y - point_a.y) - (
-            point_a.y - self.y
-        ) * (point_b.x - point_a.x)
+        return (point_a.x - self.x) * (point_b.y - point_a.y) - (point_a.y - self.y) * (
+            point_b.x - point_a.x
+        )
 
 
 def graham_scan(points: Sequence[Point]) -> list[Point]:
